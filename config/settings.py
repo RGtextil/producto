@@ -25,7 +25,7 @@ SECRET_KEY = 'vcq&b1t*-)6vuy4nwg5w$ups-6-(smirm7t-wpcg=*f%-12#=s'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['textil185.pythonanywhere.com']
+ALLOWED_HOSTS = ['textil185.pythonanywhere.com','localhost']
 
 
 # Application definition

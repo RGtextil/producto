@@ -4,9 +4,17 @@
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- ==========================================================
+     ENCABEZADO
+     ========================================================== -->
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
     <div>
-        <h1 class="h3 mb-1">Inventario</h1>
+        <h1 class="h3 fw-bold mb-1">
+            Inventario
+        </h1>
+
         <p class="text-muted mb-0">
             Administración de artículos y existencias.
         </p>
@@ -14,23 +22,210 @@
 
     <a
         href="{% url 'inventory:create' %}"
-        class="btn btn-primary"
+        class="btn btn-primary w-100 w-md-auto"
     >
         Nuevo artículo
     </a>
+
 </div>
 
 
-<div class="card shadow-sm">
-    <div class="card-body p-0">
+{% if articulos %}
 
-        {% if articulos %}
+<!-- ==========================================================
+     VISTA MÓVIL
+     ========================================================== -->
+
+<div class="d-md-none">
+
+    <div class="d-flex flex-column gap-3">
+
+        {% for articulo in articulos %}
+
+            {% with stock=articulo.items_inventario.all %}
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <!-- Cabecera -->
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+
+                        <div class="min-width-0">
+
+                            <div class="small text-muted mb-1">
+                                SKU
+                            </div>
+
+                            <code class="text-dark">
+                                {{ articulo.sku }}
+                            </code>
+
+                        </div>
+
+                        <div class="flex-shrink-0">
+
+                            {% if articulo.estado == "ACTIVO" %}
+
+                                <span class="badge text-bg-success">
+                                    Activo
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge text-bg-secondary">
+                                    Inactivo
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Descripción -->
+                    <h2 class="h6 fw-semibold mb-3">
+                        {{ articulo.descripcion }}
+                    </h2>
+
+
+                    <!-- Información principal -->
+                    <div class="row g-3 mb-3">
+
+                        <div class="col-6">
+
+                            <div class="small text-muted">
+                                Clasificación
+                            </div>
+
+                            <div class="fw-medium">
+                                {{ articulo.get_clasificacion_display }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6">
+
+                            <div class="small text-muted">
+                                Unidad
+                            </div>
+
+                            <div class="fw-medium">
+                                {{ articulo.get_unidad_medida_display }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6">
+
+                            <div class="small text-muted">
+                                Costo base
+                            </div>
+
+                            <div class="fw-medium">
+                                $ {{ articulo.costo_base|floatformat:2 }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6">
+
+                            <div class="small text-muted">
+                                Stock
+                            </div>
+
+                            <div class="fw-semibold">
+                                {{ articulo.items_inventario.all|length }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6">
+
+                            <div class="small text-muted">
+                                Mínimo
+                            </div>
+
+                            <div class="fw-medium">
+                                {{ articulo.alerta_minimo|floatformat:2 }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-6">
+
+                            <div class="small text-muted">
+                                Color
+                            </div>
+
+                            <div class="fw-medium">
+                                {{ articulo.color|default:"—" }}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Ubicación -->
+                    <div class="mb-3">
+
+                        <div class="small text-muted">
+                            Ubicación
+                        </div>
+
+                        <div class="fw-medium">
+                            {{ articulo.ubicacion_almacen|default:"—" }}
+                        </div>
+
+                    </div>
+
+
+                    <!-- Acción -->
+                    <a
+                        href="{% url 'inventory:detail' articulo.id %}"
+                        class="btn btn-outline-primary w-100"
+                    >
+                        Ver artículo
+                    </a>
+
+                </div>
+
+            </div>
+
+            {% endwith %}
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================================
+     VISTA TABLET / LAPTOP / DESKTOP
+     ========================================================== -->
+
+<div class="d-none d-md-block">
+
+    <div class="card shadow-sm">
+
+        <div class="card-body p-0">
 
             <div class="table-responsive">
+
                 <table class="table table-hover align-middle mb-0">
 
                     <thead class="table-light">
+
                         <tr>
+
                             <th>SKU</th>
                             <th>Descripción</th>
                             <th>Clasificación</th>
@@ -42,8 +237,11 @@
                             <th>Color</th>
                             <th>Estado</th>
                             <th class="text-end">Acciones</th>
+
                         </tr>
+
                     </thead>
+
 
                     <tbody>
 
@@ -54,7 +252,9 @@
                             <tr>
 
                                 <td>
-                                    <code>{{ articulo.sku }}</code>
+                                    <code>
+                                        {{ articulo.sku }}
+                                    </code>
                                 </td>
 
                                 <td>
@@ -92,24 +292,32 @@
                                 </td>
 
                                 <td>
+
                                     {% if articulo.estado == "ACTIVO" %}
+
                                         <span class="badge text-bg-success">
                                             Activo
                                         </span>
+
                                     {% else %}
+
                                         <span class="badge text-bg-secondary">
                                             Inactivo
                                         </span>
+
                                     {% endif %}
+
                                 </td>
 
                                 <td class="text-end">
+
                                     <a
                                         href="{% url 'inventory:detail' articulo.id %}"
                                         class="btn btn-sm btn-outline-primary"
                                     >
                                         Ver
                                     </a>
+
                                 </td>
 
                             </tr>
@@ -121,33 +329,46 @@
                     </tbody>
 
                 </table>
-            </div>
-
-        {% else %}
-
-            <div class="p-5 text-center">
-
-                <h2 class="h5">
-                    No hay artículos registrados
-                </h2>
-
-                <p class="text-muted mb-4">
-                    Crea el primer artículo para comenzar a administrar
-                    el inventario.
-                </p>
-
-                <a
-                    href="{% url 'inventory:create' %}"
-                    class="btn btn-primary"
-                >
-                    Crear artículo
-                </a>
 
             </div>
 
-        {% endif %}
+        </div>
 
     </div>
+
 </div>
+
+
+{% else %}
+
+<!-- ==========================================================
+     ESTADO VACÍO
+     ========================================================== -->
+
+<div class="card shadow-sm border-0">
+
+    <div class="card-body p-4 p-md-5 text-center">
+
+        <h2 class="h5 fw-semibold">
+            No hay artículos registrados
+        </h2>
+
+        <p class="text-muted mb-4">
+            Crea el primer artículo para comenzar a administrar
+            el inventario.
+        </p>
+
+        <a
+            href="{% url 'inventory:create' %}"
+            class="btn btn-primary"
+        >
+            Crear artículo
+        </a>
+
+    </div>
+
+</div>
+
+{% endif %}
 
 {% endblock %}

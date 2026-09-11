@@ -7,7 +7,7 @@ app_name = "authentication"
 
 urlpatterns = [
 path(
-"login/",
+"",
 login_view,
 name="login",
 ),

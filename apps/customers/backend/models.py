@@ -11,7 +11,6 @@ class Cliente(models.Model):
     )
     numero_documento = models.CharField(
         max_length=30,
-        unique=True,
         db_index=True,
     )
     nombre = models.CharField(
