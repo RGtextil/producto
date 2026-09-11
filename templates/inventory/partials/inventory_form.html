@@ -1,0 +1,85 @@
+<div>
+
+    <h3 class="h6 mb-3">
+        Agregar inventario
+    </h3>
+
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+
+    <form
+        method="post"
+        action="{% url 'inventory:inventory_add' articulo.id %}"
+        hx-post="{% url 'inventory:inventory_add' articulo.id %}"
+        hx-target="#inventory-form-container"
+        hx-swap="innerHTML"
+    >
+
+        {% csrf_token %}
+
+
+        <div class="row g-3">
+
+            <div class="col-md-5">
+
+                <label
+                    for="{{ form.cantidad.id_for_label }}"
+                    class="form-label"
+                >
+                    {{ form.cantidad.label }}
+                </label>
+
+                {{ form.cantidad }}
+
+                {% for error in form.cantidad.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="col-md-5">
+
+                <label
+                    for="{{ form.ubicacion.id_for_label }}"
+                    class="form-label"
+                >
+                    {{ form.ubicacion.label }}
+                </label>
+
+                {{ form.ubicacion }}
+
+                {% for error in form.ubicacion.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ error }}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+
+            <div class="col-md-2 d-flex align-items-end">
+
+                <button
+                    type="submit"
+                    class="btn btn-success w-100"
+                >
+                    Agregar
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>

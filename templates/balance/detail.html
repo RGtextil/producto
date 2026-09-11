@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Balance</h1>
+            <p class="text-muted mb-0">
+                Resumen general de la situación financiera.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'balance:otro_dinero_create' %}"
+               class="btn btn-outline-primary">
+                <i class="bi bi-wallet2"></i>
+                Otro dinero
+            </a>
+
+            <a href="{% url 'balance:deuda_create' %}"
+               class="btn btn-outline-danger">
+                <i class="bi bi-credit-card"></i>
+                Nueva deuda
+            </a>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">
+                                Valor inventario
+                            </p>
+                            <h2 class="h4 mb-0">
+                                ${{ resumen.total_inventario|floatformat:2 }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-3 text-primary">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">
+                                Saldo cartera
+                            </p>
+                            <h2 class="h4 mb-0">
+                                ${{ resumen.saldo_cartera|floatformat:2 }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-3 text-warning">
+                            <i class="bi bi-journal-text"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">
+                                Otros dineros
+                            </p>
+                            <h2 class="h4 mb-0">
+                                ${{ resumen.total_otros_dineros|floatformat:2 }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-3 text-success">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted small mb-1">
+                                Deudas
+                            </p>
+                            <h2 class="h4 mb-0 text-danger">
+                                ${{ resumen.total_deudas|floatformat:2 }}
+                            </h2>
+                        </div>
+
+                        <div class="fs-3 text-danger">
+                            <i class="bi bi-arrow-down-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Balance final -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-8">
+                    <p class="text-muted mb-1">
+                        Balance final
+                    </p>
+
+                    <h2 class="display-6 fw-bold mb-0">
+                        ${{ resumen.balance_final|floatformat:2 }}
+                    </h2>
+
+                    <small class="text-muted">
+                        Inventario + cartera + otros dineros - deudas
+                    </small>
+                </div>
+
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+
+                    <a href="{% url 'balance:otro_dinero_list' %}"
+                       class="btn btn-outline-primary me-1">
+                        Otros dineros
+                    </a>
+
+                    <a href="{% url 'balance:deuda_list' %}"
+                       class="btn btn-outline-danger">
+                        Deudas
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Otros dineros -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">
+                Otros dineros
+            </h2>
+
+            <a href="{% url 'balance:otro_dinero_create' %}"
+               class="btn btn-sm btn-primary">
+                Agregar
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if otros_dineros %}
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Concepto</th>
+                                <th>Fecha</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in otros_dineros %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'balance:otro_dinero_detail' item.id %}"
+                                           class="text-decoration-none fw-semibold">
+                                            {{ item.nombre }}
+                                        </a>
+                                    </td>
+
+                                    <td>{{ item.get_tipo_display }}</td>
+
+                                    <td>{{ item.concepto }}</td>
+
+                                    <td>{{ item.fecha|date:"d/m/Y" }}</td>
+
+                                    <td class="text-end">
+                                        ${{ item.monto|floatformat:2 }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+            {% else %}
+
+                <div class="p-4 text-center text-muted">
+                    No hay otros dineros registrados.
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+    <!-- Deudas -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">
+                Deudas por pagar
+            </h2>
+
+            <a href="{% url 'balance:deuda_create' %}"
+               class="btn btn-sm btn-danger">
+                Agregar
+            </a>
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if deudas %}
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Concepto</th>
+                                <th>Vencimiento</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for deuda in deudas %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'balance:deuda_detail' deuda.id %}"
+                                           class="text-decoration-none fw-semibold">
+                                            {{ deuda.nombre }}
+                                        </a>
+                                    </td>
+
+                                    <td>{{ deuda.get_tipo_display }}</td>
+
+                                    <td>{{ deuda.concepto }}</td>
+
+                                    <td>
+                                        {% if deuda.fecha_vencimiento %}
+                                            {{ deuda.fecha_vencimiento|date:"d/m/Y" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-end text-danger">
+                                        ${{ deuda.monto|floatformat:2 }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+            {% else %}
+
+                <div class="p-4 text-center text-muted">
+                    No hay deudas registradas.
+                </div>
+
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 mb-1">
+                Pedido #{{ pedido.id }}
+            </h1>
+
+            <p class="text-muted mb-0">
+                {{ pedido.created_at|date:"d/m/Y H:i" }}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a
+                href="{% url 'orders:list' %}"
+                class="btn btn-outline-secondary"
+            >
+                Volver
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Cliente</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <h6>
+                        {{ pedido.cliente.nombre }}
+                        {{ pedido.cliente.apellido }}
+                    </h6>
+
+                    <p class="mb-1">
+                        <strong>Documento:</strong>
+                        {{ pedido.cliente.numero_documento }}
+                    </p>
+
+                    {% if pedido.cliente.telefono %}
+                        <p class="mb-1">
+                            <strong>Teléfono:</strong>
+                            {{ pedido.cliente.telefono }}
+                        </p>
+                    {% endif %}
+
+                    {% if pedido.cliente.email %}
+                        <p class="mb-0">
+                            <strong>Email:</strong>
+                            {{ pedido.cliente.email }}
+                        </p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Estado</h5>
+                </div>
+
+                <div class="card-body">
+
+                    {% if pedido.estado == "ENTREGADO" %}
+                        <span class="badge text-bg-success fs-6">
+                            Entregado
+                        </span>
+                    {% else %}
+                        <span class="badge text-bg-secondary fs-6">
+                            Cancelado
+                        </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Productos del pedido</h5>
+                </div>
+
+                <div class="card-body p-0">
+
+                    {% if items %}
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover align-middle mb-0">
+
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>SKU</th>
+                                        <th>Artículo</th>
+                                        <th class="text-end">
+                                            Cantidad
+                                        </th>
+                                        <th class="text-end">
+                                            Precio
+                                        </th>
+                                        <th class="text-end">
+                                            Subtotal
+                                        </th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+
+                                    {% for item in items %}
+                                        <tr>
+
+                                            <td>
+                                                <code>{{ item.sku }}</code>
+                                            </td>
+
+                                            <td>
+                                                {{ item.articulo.descripcion }}
+                                            </td>
+
+                                            <td class="text-end">
+                                                {{ item.cantidad|floatformat:2 }}
+                                            </td>
+
+                                            <td class="text-end">
+                                                ${{ item.precio_venta|floatformat:2 }}
+                                            </td>
+
+                                            <td class="text-end fw-semibold">
+                                                ${{ item.subtotal|floatformat:2 }}
+                                            </td>
+
+                                        </tr>
+                                    {% endfor %}
+
+                                </tbody>
+
+                                <tfoot>
+
+                                    <tr>
+                                        <td
+                                            colspan="4"
+                                            class="text-end fw-bold"
+                                        >
+                                            Total
+                                        </td>
+
+                                        <td class="text-end fw-bold fs-5">
+                                            ${{ total|floatformat:2 }}
+                                        </td>
+                                    </tr>
+
+                                </tfoot>
+
+                            </table>
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="text-center py-5">
+                            <p class="text-muted mb-0">
+                                Este pedido no contiene productos.
+                            </p>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

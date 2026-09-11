@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 mb-1">{{ deuda.nombre }}</h1>
+            <p class="text-muted mb-0">
+                Detalle de la deuda.
+            </p>
+        </div>
+
+        <a href="{% url 'balance:deuda_list' %}"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Nombre
+                    </small>
+                    <strong>
+                        {{ deuda.nombre }}
+                    </strong>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Tipo
+                    </small>
+                    <strong>
+                        {{ deuda.get_tipo_display }}
+                    </strong>
+                </div>
+
+                <div class="col-12">
+                    <small class="text-muted d-block">
+                        Concepto
+                    </small>
+                    <strong>
+                        {{ deuda.concepto }}
+                    </strong>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted d-block">
+                        Fecha
+                    </small>
+                    <strong>
+                        {{ deuda.fecha|date:"d/m/Y" }}
+                    </strong>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted d-block">
+                        Vencimiento
+                    </small>
+
+                    <strong>
+                        {% if deuda.fecha_vencimiento %}
+                            {{ deuda.fecha_vencimiento|date:"d/m/Y" }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="col-md-4">
+                    <small class="text-muted d-block">
+                        Monto pendiente
+                    </small>
+
+                    <strong class="fs-4 text-danger">
+                        ${{ deuda.monto|floatformat:2 }}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

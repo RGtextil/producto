@@ -1,0 +1,89 @@
+<div class="col-12 order-item">
+
+    <div class="card border">
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-5">
+
+                    <label class="form-label">
+                        Artículo
+                    </label>
+
+                    <select
+                        name="articulo"
+                        class="form-select"
+                        required
+                    >
+                        <option value="">
+                            Seleccione un artículo
+                        </option>
+
+                        {% for articulo in item_form.articulo.field.queryset %}
+                            <option value="{{ articulo.id }}">
+                                {{ articulo.sku }} -
+                                {{ articulo.descripcion }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+                        Cantidad
+                    </label>
+
+                    <input
+                        type="number"
+                        name="cantidad"
+                        class="form-control"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Precio de venta
+                    </label>
+
+                    <input
+                        type="number"
+                        name="precio_venta"
+                        class="form-control"
+                        min="0"
+                        step="0.01"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="col-md-2">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger w-100 remove-item"
+                    >
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

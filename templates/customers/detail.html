@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}{{ cliente.nombre }} {{ cliente.apellido }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                {{ cliente.nombre }} {{ cliente.apellido }}
+            </h1>
+
+            <p class="text-muted mb-0">
+                {{ cliente.tipo_documento }} · {{ cliente.numero_documento }}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a
+                href="{% url 'customers:list' %}"
+                class="btn btn-outline-secondary"
+            >
+                Volver
+            </a>
+
+            <a
+                href="{% url 'customers:update' cliente.id %}"
+                class="btn btn-primary"
+            >
+                Editar
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar"
+                ></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+
+        <div class="col-lg-7">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Información del cliente</h2>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Tipo de documento
+                            </small>
+
+                            <span class="fw-semibold">
+                                {{ cliente.tipo_documento }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Número de documento
+                            </small>
+
+                            <span class="fw-semibold">
+                                {{ cliente.numero_documento }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Nombre
+                            </small>
+
+                            <span>
+                                {{ cliente.nombre }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Apellido
+                            </small>
+
+                            <span>
+                                {{ cliente.apellido|default:"—" }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Teléfono
+                            </small>
+
+                            <span>
+                                {{ cliente.telefono|default:"—" }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Correo electrónico
+                            </small>
+
+                            <span>
+                                {{ cliente.email|default:"—" }}
+                            </span>
+                        </div>
+
+                        <div class="col-12">
+                            <small class="text-muted d-block">
+                                Dirección
+                            </small>
+
+                            <span>
+                                {{ cliente.direccion|default:"—" }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Ciudad
+                            </small>
+
+                            <span>
+                                {{ cliente.ciudad|default:"—" }}
+                            </span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">
+                                Departamento
+                            </small>
+
+                            <span>
+                                {{ cliente.departamento|default:"—" }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Condiciones comerciales</h2>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block">
+                            Límite de crédito
+                        </small>
+
+                        <span class="fs-4 fw-semibold">
+                            ${{ cliente.limite_credito|floatformat:2 }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <small class="text-muted d-block mb-1">
+                            Estado
+                        </small>
+
+                        {% if cliente.estado == "ACTIVO" %}
+                            <span class="badge text-bg-success">
+                                Activo
+                            </span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">
+                                Inactivo
+                            </span>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h2 class="h5 mb-0">Acciones</h2>
+                </div>
+
+                <div class="card-body">
+
+                    {% if cliente.estado == "ACTIVO" %}
+
+                        <form
+                            method="post"
+                            action="{% url 'customers:deactivate' cliente.id %}"
+                            class="mb-2"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-outline-warning w-100"
+                                onclick="return confirm('¿Deseas desactivar este cliente?');"
+                            >
+                                Desactivar cliente
+                            </button>
+                        </form>
+
+                    {% else %}
+
+                        <form
+                            method="post"
+                            action="{% url 'customers:activate' cliente.id %}"
+                            class="mb-2"
+                        >
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-outline-success w-100"
+                            >
+                                Activar cliente
+                            </button>
+                        </form>
+
+                    {% endif %}
+
+                    <form
+                        method="post"
+                        action="{% url 'customers:delete' cliente.id %}"
+                    >
+                        {% csrf_token %}
+
+                        <button
+                            type="submit"
+                            class="btn btn-outline-danger w-100"
+                            onclick="return confirm('¿Deseas eliminar este cliente? Esta acción no se puede deshacer.');"
+                        >
+                            Eliminar cliente
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <div class="row">
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Cliente creado
+                    </small>
+
+                    <span>
+                        {{ cliente.created_at|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+
+                <div class="col-md-6">
+                    <small class="text-muted d-block">
+                        Última actualización
+                    </small>
+
+                    <span>
+                        {{ cliente.updated_at|date:"d/m/Y H:i" }}
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

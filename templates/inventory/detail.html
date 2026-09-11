@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}{{ articulo.descripcion }}{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start mb-4">
+
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+
+            <h1 class="h3 mb-0">
+                {{ articulo.descripcion }}
+            </h1>
+
+            {% if articulo.estado == "ACTIVO" %}
+                <span class="badge text-bg-success">
+                    Activo
+                </span>
+            {% else %}
+                <span class="badge text-bg-secondary">
+                    Inactivo
+                </span>
+            {% endif %}
+
+        </div>
+
+        <div class="text-muted">
+            SKU:
+            <code>{{ articulo.sku }}</code>
+        </div>
+    </div>
+
+
+    <div class="d-flex gap-2">
+
+        <a
+            href="{% url 'inventory:update' articulo.id %}"
+            class="btn btn-outline-primary"
+        >
+            Editar
+        </a>
+
+        <form
+            method="post"
+            action="{% url 'inventory:delete' articulo.id %}"
+            onsubmit="return confirm('¿Deseas eliminar este artículo?');"
+        >
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="btn btn-outline-danger"
+            >
+                Eliminar
+            </button>
+        </form>
+
+    </div>
+
+</div>
+
+
+{% if low_stock %}
+    <div class="alert alert-warning">
+        <strong>Stock bajo.</strong>
+        El stock actual está por debajo del mínimo configurado.
+    </div>
+{% endif %}
+
+
+<div class="row g-4 mb-4">
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Stock actual
+                </div>
+
+                <div class="fs-3 fw-semibold">
+                    {{ stock|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Stock mínimo
+                </div>
+
+                <div class="fs-3 fw-semibold">
+                    {{ articulo.alerta_minimo|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Costo base
+                </div>
+
+                <div class="fs-3 fw-semibold">
+                    $ {{ articulo.costo_base|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-6 col-lg-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted small">
+                    Unidad
+                </div>
+
+                <div class="fs-5 fw-semibold">
+                    {{ articulo.get_unidad_medida_display }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="card shadow-sm mb-4">
+
+    <div class="card-header bg-white">
+        <h2 class="h5 mb-0">
+            Información del artículo
+        </h2>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <div class="text-muted small">
+                    Clasificación
+                </div>
+
+                <div>
+                    {{ articulo.get_clasificacion_display }}
+                </div>
+            </div>
+
+
+            <div class="col-md-6 mb-3">
+                <div class="text-muted small">
+                    Color
+                </div>
+
+                <div>
+                    {{ articulo.color|default:"—" }}
+                </div>
+            </div>
+
+
+            <div class="col-md-6 mb-3">
+                <div class="text-muted small">
+                    Ubicación en almacén
+                </div>
+
+                <div>
+                    {{ articulo.ubicacion_almacen|default:"—" }}
+                </div>
+            </div>
+
+
+            <div class="col-md-6 mb-3">
+                <div class="text-muted small">
+                    Estado
+                </div>
+
+                <div>
+                    {{ articulo.get_estado_display }}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="card shadow-sm">
+
+    <div class="card-header bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+
+            <h2 class="h5 mb-0">
+                Inventario
+            </h2>
+
+            <span class="badge text-bg-primary">
+                Stock: {{ stock|floatformat:2 }}
+            </span>
+
+        </div>
+    </div>
+
+
+    <div class="card-body">
+
+        <div
+            id="inventory-form-container"
+            class="mb-4"
+        >
+        {% include "inventory/partials/inventory_form.html" with form=inventory_form %}
+        </div>
+
+
+        <div id="inventory-table-container">
+
+            {% include "inventory/partials/inventory_table.html" %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="mt-4">
+
+    <a
+        href="{% url 'inventory:list' %}"
+        class="btn btn-outline-secondary"
+    >
+        Volver al inventario
+    </a>
+
+</div>
+
+{% endblock %}

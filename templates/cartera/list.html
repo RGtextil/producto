@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+            <h1 class="h3 mb-1">Cartera</h1>
+            <p class="text-muted mb-0">
+                Control de cuentas pendientes y abonos.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="{% url 'cartera:pedidos_disponibles' %}"
+               class="btn btn-primary">
+                <i class="bi bi-receipt"></i>
+                Pedidos entregados
+            </a>
+
+            <a href="{% url 'cartera:otra_create' %}"
+               class="btn btn-outline-primary">
+                Otra cartera
+            </a>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">
+                        Total cartera
+                    </div>
+
+                    <div class="fs-3 fw-semibold">
+                        ${{ total_carteras|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">
+                        Total abonos
+                    </div>
+
+                    <div class="fs-3 fw-semibold text-success">
+                        ${{ total_abonos|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-1">
+                        Saldo pendiente
+                    </div>
+
+                    <div class="fs-3 fw-semibold text-danger">
+                        ${{ saldo_total|floatformat:2 }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabla -->
+    <div id="cartera-table-container">
+        {% include "cartera/partials/cartera_table.html" %}
+    </div>
+
+</div>
+
+{% endblock %}

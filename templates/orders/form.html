@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">{{ title }}</h1>
+        <p class="text-muted mb-0">
+            Selecciona el cliente y agrega los productos del pedido.
+        </p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
+    <form
+        method="post"
+        id="pedido-form"
+    >
+        {% csrf_token %}
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Información del pedido</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-md-6">
+
+                        <label
+                            for="{{ form.cliente.id_for_label }}"
+                            class="form-label"
+                        >
+                            {{ form.cliente.label }}
+                        </label>
+
+                        {{ form.cliente }}
+
+                        {% if form.cliente.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.cliente.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">Productos</h5>
+                    <small class="text-muted">
+                        Agrega uno o varios productos al pedido.
+                    </small>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm"
+                    id="add-item"
+                >
+                    <i class="bi bi-plus-lg"></i>
+                    Agregar producto
+                </button>
+            </div>
+
+            <div class="card-body">
+
+                <div
+                    id="items-container"
+                    class="row g-3"
+                >
+
+                    <div class="col-12 order-item">
+                        <div class="card border">
+
+                            <div class="card-body">
+
+                                <div class="row g-3 align-items-end">
+
+                                    <div class="col-md-5">
+                                        <label class="form-label">
+                                            Artículo
+                                        </label>
+
+                                        <select
+                                            name="articulo"
+                                            class="form-select"
+                                            required
+                                        >
+                                            <option value="">
+                                                Seleccione un artículo
+                                            </option>
+
+                                            {% for articulo in item_form.articulo.field.queryset %}
+                                                <option value="{{ articulo.id }}">
+                                                    {{ articulo.sku }} -
+                                                    {{ articulo.descripcion }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">
+                                            Cantidad
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            name="cantidad"
+                                            class="form-control"
+                                            min="0.01"
+                                            step="0.01"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label class="form-label">
+                                            Precio de venta
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            name="precio_venta"
+                                            class="form-control"
+                                            min="0"
+                                            step="0.01"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-danger w-100 remove-item"
+                                        >
+                                            Eliminar
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+
+            <a
+                href="{% url 'orders:list' %}"
+                class="btn btn-outline-secondary"
+            >
+                Cancelar
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Crear pedido
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const container = document.getElementById("items-container");
+    const addButton = document.getElementById("add-item");
+
+    function createItemRow() {
+        const firstItem = container.querySelector(".order-item");
+
+        const newItem = firstItem.cloneNode(true);
+
+        newItem.querySelectorAll("input").forEach(function (input) {
+            input.value = "";
+        });
+
+        newItem.querySelectorAll("select").forEach(function (select) {
+            select.selectedIndex = 0;
+        });
+
+        container.appendChild(newItem);
+    }
+
+    addButton.addEventListener("click", function () {
+        createItemRow();
+    });
+
+    container.addEventListener("click", function (event) {
+
+        if (!event.target.classList.contains("remove-item")) {
+            return;
+        }
+
+        const rows = container.querySelectorAll(".order-item");
+
+        if (rows.length === 1) {
+            return;
+        }
+
+        event.target.closest(".order-item").remove();
+    });
+
+});
+</script>
+
+{% endblock %}

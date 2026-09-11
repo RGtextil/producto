@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 mb-1">Deudas por pagar</h1>
+            <p class="text-muted mb-0">
+                Obligaciones pendientes registradas.
+            </p>
+        </div>
+
+        <a href="{% url 'balance:deuda_create' %}"
+           class="btn btn-danger">
+            Nueva deuda
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body p-0">
+
+            {% if deudas %}
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Tipo</th>
+                                <th>Concepto</th>
+                                <th>Fecha</th>
+                                <th>Vencimiento</th>
+                                <th class="text-end">Monto</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for deuda in deudas %}
+
+                                <tr>
+
+                                    <td>
+                                        <a href="{% url 'balance:deuda_detail' deuda.id %}"
+                                           class="fw-semibold text-decoration-none">
+                                            {{ deuda.nombre }}
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        {{ deuda.get_tipo_display }}
+                                    </td>
+
+                                    <td>
+                                        {{ deuda.concepto }}
+                                    </td>
+
+                                    <td>
+                                        {{ deuda.fecha|date:"d/m/Y" }}
+                                    </td>
+
+                                    <td>
+                                        {% if deuda.fecha_vencimiento %}
+                                            {{ deuda.fecha_vencimiento|date:"d/m/Y" }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-end text-danger fw-semibold">
+                                        ${{ deuda.monto|floatformat:2 }}
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            {% else %}
+
+                <div class="p-5 text-center text-muted">
+
+                    <p class="mb-3">
+                        No hay deudas registradas.
+                    </p>
+
+                    <a href="{% url 'balance:deuda_create' %}"
+                       class="btn btn-danger">
+                        Registrar deuda
+                    </a>
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

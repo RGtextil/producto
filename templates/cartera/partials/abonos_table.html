@@ -1,0 +1,95 @@
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+
+            <h2 class="h5 mb-0">
+                Abonos
+            </h2>
+
+            <span class="badge text-bg-secondary">
+                {{ abonos|length }}
+            </span>
+
+        </div>
+    </div>
+
+    <div class="card-body p-0">
+
+        {% if abonos %}
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Concepto</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for abono in abonos %}
+
+                    <tr>
+
+                        <td>
+                            {{ abono.fecha|date:"d/m/Y" }}
+                        </td>
+
+                        <td>
+                            {% if abono.concepto %}
+                                {{ abono.concepto }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+
+                        <td class="text-end fw-semibold text-success">
+                            ${{ abono.monto|floatformat:2 }}
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+                <tfoot class="table-light">
+
+                    <tr>
+                        <th colspan="2">
+                            Total abonos
+                        </th>
+
+                        <th class="text-end">
+                            ${{ total_abonos|floatformat:2 }}
+                        </th>
+                    </tr>
+
+                </tfoot>
+
+            </table>
+
+        </div>
+
+        {% else %}
+
+        <div class="text-center py-4">
+
+            <p class="text-muted mb-0">
+                Esta cartera todavía no tiene abonos.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>

@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <a href="{% url 'cartera:list' %}"
+               class="text-decoration-none">
+                ← Cartera
+            </a>
+
+            <h1 class="h3 mt-2 mb-1">
+                {{ cartera.nombre }}
+            </h1>
+
+            <p class="text-muted mb-0">
+                {{ cartera.concepto }}
+            </p>
+        </div>
+
+        <div>
+            {% if cartera.estado == "PAGADA" %}
+                <span class="badge text-bg-success fs-6">
+                    Pagada
+                </span>
+            {% else %}
+                <span class="badge text-bg-warning fs-6">
+                    Pendiente
+                </span>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- Resumen -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <div class="small text-muted">
+                        Total
+                    </div>
+
+                    <div class="fs-3 fw-semibold">
+                        ${{ cartera.total|floatformat:2 }}
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <div class="small text-muted">
+                        Abonos
+                    </div>
+
+                    <div class="fs-3 fw-semibold text-success">
+                        ${{ total_abonos|floatformat:2 }}
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+
+                    <div class="small text-muted">
+                        Saldo pendiente
+                    </div>
+
+                    <div class="fs-3 fw-semibold text-danger">
+                        ${{ saldo|floatformat:2 }}
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Información -->
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white py-3">
+                    <h2 class="h5 mb-0">
+                        Información
+                    </h2>
+                </div>
+
+                <div class="card-body">
+
+                    <dl class="row mb-0">
+
+                        <dt class="col-sm-5">
+                            Tipo
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            {% if cartera.tipo == "PEDIDO" %}
+                                Pedido
+                            {% else %}
+                                Otra cartera
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-5">
+                            Inicio
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            {{ cartera.fecha_inicio|date:"d/m/Y" }}
+                        </dd>
+
+                        <dt class="col-sm-5">
+                            Vencimiento
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            {% if cartera.fecha_vencimiento %}
+                                {{ cartera.fecha_vencimiento|date:"d/m/Y" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </dd>
+
+                        {% if cartera.pedido %}
+
+                        <dt class="col-sm-5">
+                            Pedido
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            #{{ cartera.pedido.id }}
+                        </dd>
+
+                        <dt class="col-sm-5">
+                            Cliente
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            {{ cartera.pedido.cliente }}
+                        </dd>
+
+                        {% endif %}
+
+                    </dl>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Abonos -->
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm mb-4">
+
+                <div class="card-header bg-white py-3">
+                    <h2 class="h5 mb-0">
+                        Registrar abono
+                    </h2>
+                </div>
+
+                <div class="card-body">
+
+                    {% if cartera.estado == "PENDIENTE" %}
+
+                    <form method="post"
+                          action="{% url 'cartera:abono_create' cartera.id %}"
+                          hx-post="{% url 'cartera:abono_create' cartera.id %}"
+                          hx-target="#cartera-detail-content"
+                          hx-swap="innerHTML"
+                          hx-disabled-elt="this">
+
+                        {% csrf_token %}
+
+                        {% if abono_form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ abono_form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    Monto
+                                </label>
+
+                                {{ abono_form.monto }}
+
+                                {% for error in abono_form.monto.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    Fecha
+                                </label>
+
+                                {{ abono_form.fecha }}
+
+                                {% for error in abono_form.fecha.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    Concepto
+                                </label>
+
+                                {{ abono_form.concepto }}
+
+                                {% for error in abono_form.concepto.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit"
+                                    class="btn btn-success">
+                                Registrar abono
+                            </button>
+                        </div>
+
+                    </form>
+
+                    {% else %}
+
+                    <div class="alert alert-success mb-0">
+                        Esta cartera está completamente pagada.
+                    </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- Tabla abonos -->
+            <div id="cartera-detail-content">
+                {% include "cartera/partials/abonos_table.html" %}
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

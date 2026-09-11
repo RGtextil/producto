@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <a href="{% url 'cartera:list' %}"
+           class="text-decoration-none">
+            ← Cartera
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white py-3">
+                    <h1 class="h5 mb-0">
+                        Crear otra cartera
+                    </h1>
+                </div>
+
+                <div class="card-body">
+
+                    <form method="post"
+                          action="{% url 'cartera:otra_create_post' %}"
+                          hx-post="{% url 'cartera:otra_create_post' %}"
+                          hx-disabled-elt="this">
+
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Nombre
+                            </label>
+
+                            {{ form.nombre }}
+
+                            {% for error in form.nombre.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Concepto
+                            </label>
+
+                            {{ form.concepto }}
+
+                            {% for error in form.concepto.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Fecha de inicio
+                                </label>
+
+                                {{ form.fecha_inicio }}
+
+                                {% for error in form.fecha_inicio.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Fecha de vencimiento
+                                </label>
+
+                                {{ form.fecha_vencimiento }}
+
+                                <div class="form-text">
+                                    Opcional.
+                                </div>
+
+                                {% for error in form.fecha_vencimiento.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label class="form-label">
+                                Total
+                            </label>
+
+                            {{ form.total }}
+
+                            {% for error in form.total.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a href="{% url 'cartera:list' %}"
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Crear cartera
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

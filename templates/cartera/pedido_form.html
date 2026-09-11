@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+        <a href="{% url 'cartera:pedidos_disponibles' %}"
+           class="text-decoration-none">
+            ← Pedidos entregados
+        </a>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Pedido -->
+        <div class="col-lg-5">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white py-3">
+                    <h1 class="h5 mb-0">
+                        Pedido #{{ pedido.id }}
+                    </h1>
+                </div>
+
+                <div class="card-body">
+
+                    <dl class="row mb-0">
+
+                        <dt class="col-sm-5">
+                            Cliente
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            {{ pedido.cliente }}
+                        </dd>
+
+                        <dt class="col-sm-5">
+                            Estado
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            <span class="badge text-bg-success">
+                                Entregado
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-5">
+                            Fecha
+                        </dt>
+
+                        <dd class="col-sm-7">
+                            {{ pedido.created_at|date:"d/m/Y H:i" }}
+                        </dd>
+
+                        <dt class="col-sm-5">
+                            Total
+                        </dt>
+
+                        <dd class="col-sm-7 fw-bold">
+                            ${{ pedido.total|floatformat:2 }}
+                        </dd>
+
+                    </dl>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Formulario -->
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-white py-3">
+                    <h2 class="h5 mb-0">
+                        Crear cartera
+                    </h2>
+                </div>
+
+                <div class="card-body">
+
+                    <form method="post"
+                          action="{% url 'cartera:pedido_create' pedido.id %}"
+                          hx-post="{% url 'cartera:pedido_create' pedido.id %}"
+                          hx-disabled-elt="this">
+
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                Concepto
+                            </label>
+
+                            {{ form.concepto }}
+
+                            {% for error in form.concepto.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Fecha de inicio
+                                </label>
+
+                                {{ form.fecha_inicio }}
+
+                                {% for error in form.fecha_inicio.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Fecha de vencimiento
+                                </label>
+
+                                {{ form.fecha_vencimiento }}
+
+                                <div class="form-text">
+                                    Opcional.
+                                </div>
+
+                                {% for error in form.fecha_vencimiento.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+
+                        </div>
+
+                        <div class="alert alert-light border">
+                            <div class="d-flex justify-content-between">
+                                <span>Total del pedido</span>
+
+                                <strong>
+                                    ${{ pedido.total|floatformat:2 }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a href="{% url 'cartera:pedidos_disponibles' %}"
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Crear cartera
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

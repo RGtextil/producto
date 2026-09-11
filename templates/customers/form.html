@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="mb-4">
+        <h1 class="h3 mb-1">{{ title }}</h1>
+
+        <p class="text-muted mb-0">
+            {% if cliente %}
+                Actualiza la información del cliente.
+            {% else %}
+                Registra un nuevo cliente.
+            {% endif %}
+        </p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if not cliente %}
+                    <div class="mb-4">
+                        <h2 class="h5">Identificación</h2>
+                        <hr>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label
+                                    for="{{ form.tipo_documento.id_for_label }}"
+                                    class="form-label"
+                                >
+                                    {{ form.tipo_documento.label }}
+                                </label>
+
+                                {{ form.tipo_documento }}
+
+                                {% for error in form.tipo_documento.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="col-md-8">
+                                <label
+                                    for="{{ form.numero_documento.id_for_label }}"
+                                    class="form-label"
+                                >
+                                    {{ form.numero_documento.label }}
+                                </label>
+
+                                {{ form.numero_documento }}
+
+                                {% for error in form.numero_documento.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <h2 class="h5">Información personal</h2>
+                    <hr>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label
+                                for="{{ form.nombre.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.nombre.label }}
+                            </label>
+
+                            {{ form.nombre }}
+
+                            {% for error in form.nombre.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label
+                                for="{{ form.apellido.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.apellido.label }}
+                            </label>
+
+                            {{ form.apellido }}
+
+                            {% for error in form.apellido.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label
+                                for="{{ form.telefono.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.telefono.label }}
+                            </label>
+
+                            {{ form.telefono }}
+
+                            {% for error in form.telefono.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label
+                                for="{{ form.email.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.email.label }}
+                            </label>
+
+                            {{ form.email }}
+
+                            {% for error in form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h5">Ubicación</h2>
+                    <hr>
+
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label
+                                for="{{ form.direccion.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.direccion.label }}
+                            </label>
+
+                            {{ form.direccion }}
+
+                            {% for error in form.direccion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label
+                                for="{{ form.ciudad.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.ciudad.label }}
+                            </label>
+
+                            {{ form.ciudad }}
+
+                            {% for error in form.ciudad.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label
+                                for="{{ form.departamento.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.departamento.label }}
+                            </label>
+
+                            {{ form.departamento }}
+
+                            {% for error in form.departamento.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h5">Condiciones comerciales</h2>
+                    <hr>
+
+                    <div class="row g-3">
+
+                        <div class="{% if cliente %}col-md-6{% else %}col-md-12{% endif %}">
+                            <label
+                                for="{{ form.limite_credito.id_for_label }}"
+                                class="form-label"
+                            >
+                                {{ form.limite_credito.label }}
+                            </label>
+
+                            {{ form.limite_credito }}
+
+                            <div class="form-text">
+                                Define el máximo de crédito permitido para este cliente.
+                            </div>
+
+                            {% for error in form.limite_credito.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if cliente %}
+                            <div class="col-md-6">
+                                <label
+                                    for="{{ form.estado.id_for_label }}"
+                                    class="form-label"
+                                >
+                                    {{ form.estado.label }}
+                                </label>
+
+                                {{ form.estado }}
+
+                                {% for error in form.estado.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ error }}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    {% if cliente %}
+                        <a
+                            href="{% url 'customers:detail' cliente.id %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancelar
+                        </a>
+                    {% else %}
+                        <a
+                            href="{% url 'customers:list' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancelar
+                        </a>
+                    {% endif %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        {{ submit_text }}
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
