@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load formato %}
 {% block title %}Pedido #{{ pedido.id }}{% endblock %}
 
 {% block content %}
@@ -143,15 +143,15 @@
                                             </td>
 
                                             <td class="text-end">
-                                                {{ item.cantidad|floatformat:2 }}
+                                                {{ item.cantidad|moneda }}
                                             </td>
 
                                             <td class="text-end">
-                                                ${{ item.precio_venta|floatformat:2 }}
+                                                ${{ item.precio_venta|moneda }}
                                             </td>
 
                                             <td class="text-end fw-semibold">
-                                                ${{ item.subtotal|floatformat:2 }}
+                                                ${{ item.subtotal|moneda }}
                                             </td>
 
                                         </tr>
@@ -170,7 +170,7 @@
                                         </td>
 
                                         <td class="text-end fw-bold fs-5">
-                                            ${{ total|floatformat:2 }}
+                                            ${{ total|moneda }}
                                         </td>
                                     </tr>
 

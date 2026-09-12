@@ -196,15 +196,7 @@ class OrderService:
             cantidad = item_data["cantidad"]
             precio_venta = item_data["precio_venta"]
 
-            stock = ItemInventarioRepository.get_stock(
-                articulo
-            )
-
-            if stock < cantidad:
-                raise StockInsuficienteException(
-                    f"No existe suficiente stock para "
-                    f"el artículo {articulo.sku}."
-                )
+      
 
             subtotal = cantidad * precio_venta
 
@@ -217,57 +209,9 @@ class OrderService:
                 subtotal=subtotal,
             )
 
-            cls._decrease_stock(
-                articulo,
-                cantidad,
-            )
-
         return pedido
 
-    @staticmethod
-    def _decrease_stock(articulo, cantidad):
-        items = list(
-            ItemInventarioRepository.list_by_articulo(
-                articulo
-            )
-        )
-
-        stock_total = sum(
-            (
-                item.cantidad
-                for item in items
-            ),
-            Decimal("0"),
-        )
-
-        if stock_total < cantidad:
-            raise StockInsuficienteException(
-                f"No existe suficiente stock para "
-                f"el artículo {articulo.sku}."
-            )
-
-        restante = cantidad
-
-        for item in items:
-            if restante <= 0:
-                break
-
-            descuento = min(
-                item.cantidad,
-                restante,
-            )
-
-            nueva_cantidad = (
-                item.cantidad - descuento
-            )
-
-            ItemInventarioRepository.update(
-                item,
-                cantidad=nueva_cantidad,
-            )
-
-            restante -= descuento
-
+  
     @staticmethod
     def get_total(pedido_id):
         pedido = PedidoRepository.get_required(

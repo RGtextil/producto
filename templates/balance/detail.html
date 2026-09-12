@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% load formato %}
 
 {% block content %}
 <div class="container-fluid py-4">
+
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <div>
@@ -10,6 +12,19 @@
                 Resumen general de la situación financiera.
             </p>
         </div>
+  <div class="col-md-8">
+                    <p class="text-muted mb-1">
+                        Balance final
+                    </p>
+
+                    <h2 class="display-6 fw-bold mb-0">
+                        ${{ resumen.balance_final|moneda }}
+                    </h2>
+
+                    <small class="text-muted">
+                        Inventario + cartera + otros dineros - deudas
+                    </small>
+                </div>
 
         <div class="d-flex gap-2">
             <a href="{% url 'balance:otro_dinero_create' %}"
@@ -34,14 +49,13 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <p class="text-muted small mb-1">
-                                Valor inventario
-                            </p>
-                            <h2 class="h4 mb-0">
-                                ${{ resumen.total_inventario|floatformat:2 }}
-                            </h2>
-                        </div>
-
+    <p class="text-muted small mb-1">
+        Valor inventario
+    </p>
+    <h2 class="h4 mb-0">
+        ${{ resumen.total_inventario|moneda }}
+    </h2>
+</div>
                         <div class="fs-3 text-primary">
                             <i class="bi bi-box-seam"></i>
                         </div>
@@ -59,7 +73,7 @@
                                 Saldo cartera
                             </p>
                             <h2 class="h4 mb-0">
-                                ${{ resumen.saldo_cartera|floatformat:2 }}
+                                ${{ resumen.saldo_cartera|moneda}}
                             </h2>
                         </div>
 
@@ -80,7 +94,7 @@
                                 Otros dineros
                             </p>
                             <h2 class="h4 mb-0">
-                                ${{ resumen.total_otros_dineros|floatformat:2 }}
+                                ${{ resumen.total_otros_dineros|moneda }}
                             </h2>
                         </div>
 
@@ -101,7 +115,7 @@
                                 Deudas
                             </p>
                             <h2 class="h4 mb-0 text-danger">
-                                ${{ resumen.total_deudas|floatformat:2 }}
+                                ${{ resumen.total_deudas|moneda }}
                             </h2>
                         </div>
 
@@ -121,20 +135,7 @@
 
             <div class="row align-items-center">
 
-                <div class="col-md-8">
-                    <p class="text-muted mb-1">
-                        Balance final
-                    </p>
-
-                    <h2 class="display-6 fw-bold mb-0">
-                        ${{ resumen.balance_final|floatformat:2 }}
-                    </h2>
-
-                    <small class="text-muted">
-                        Inventario + cartera + otros dineros - deudas
-                    </small>
-                </div>
-
+              
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
 
                     <a href="{% url 'balance:otro_dinero_list' %}"
@@ -202,7 +203,7 @@
                                     <td>{{ item.fecha|date:"d/m/Y" }}</td>
 
                                     <td class="text-end">
-                                        ${{ item.monto|floatformat:2 }}
+                                        ${{ item.monto|moneda }}
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -276,7 +277,7 @@
                                     </td>
 
                                     <td class="text-end text-danger">
-                                        ${{ deuda.monto|floatformat:2 }}
+                                        ${{ deuda.monto|moneda }}
                                     </td>
                                 </tr>
                             {% endfor %}

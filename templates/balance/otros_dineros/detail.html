@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load formato %}
 {% block content %}
 <div class="container py-4">
 
@@ -47,7 +47,7 @@
                     <hr>
                     <small class="text-muted d-block">Monto</small>
                     <span class="fs-3 fw-bold">
-                        ${{ otro_dinero.monto|floatformat:2 }}
+                        ${{ otro_dinero.monto|moneda }}
                     </span>
                 </div>
 

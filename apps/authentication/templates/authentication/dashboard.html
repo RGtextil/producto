@@ -77,7 +77,29 @@
         </p>
 
     </div>
+     <!-- Balance -->
+        <div class="col-12 col-sm-6 col-lg-4">
 
+            <a
+                href="{% url 'balance:detail' %}"
+                class="text-decoration-none text-dark"
+            >
+                <div class="card h-100 border shadow-sm">
+                    <div class="card-body p-4">
+
+                        <h5 class="card-title fw-semibold mb-2">
+                            Balance
+                        </h5>
+
+                        <p class="card-text text-muted mb-0">
+                            Consulta el estado financiero general.
+                        </p>
+
+                    </div>
+                </div>
+            </a>
+
+        </div>
 
     <!-- Módulos -->
     <div class="row g-3 g-lg-4">
@@ -182,29 +204,7 @@
         </div>
 
 
-        <!-- Balance -->
-        <div class="col-12 col-sm-6 col-lg-4">
-
-            <a
-                href="{% url 'balance:detail' %}"
-                class="text-decoration-none text-dark"
-            >
-                <div class="card h-100 border shadow-sm">
-                    <div class="card-body p-4">
-
-                        <h5 class="card-title fw-semibold mb-2">
-                            Balance
-                        </h5>
-
-                        <p class="card-text text-muted mb-0">
-                            Consulta el estado financiero general.
-                        </p>
-
-                    </div>
-                </div>
-            </a>
-
-        </div>
+   
 
     </div>
 
