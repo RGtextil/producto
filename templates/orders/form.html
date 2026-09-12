@@ -3,61 +3,65 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block content %}
+
 <div class="container-fluid py-4">
 
-    <div class="mb-4">
-        <h1 class="h3 mb-1">{{ title }}</h1>
-        <p class="text-muted mb-0">
-            Selecciona el cliente y agrega los productos del pedido.
-        </p>
+
+<div class="mb-4">
+    <h1 class="h3 mb-1">{{ title }}</h1>
+    <p class="text-muted mb-0">
+        Selecciona el cliente y agrega los productos del pedido.
+    </p>
+</div>
+
+{% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
+
+<form
+    method="post"
+    id="pedido-form"
+>
+    {% csrf_token %}
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Información del pedido</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-md-6">
+
+                    <label
+                        for="{{ form.cliente.id_for_label }}"
+                        class="form-label"
+                    >
+                        {{ form.cliente.label }}
+                    </label>
+
+                    {{ form.cliente }}
+
+                    {% if form.cliente.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.cliente.errors }}
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger">
-            {{ form.non_field_errors }}
-        </div>
-    {% endif %}
+    <div class="card border-0 shadow-sm mb-4">
 
-    <form
-        method="post"
-        id="pedido-form"
-    >
-        {% csrf_token %}
+        <div class="card-header bg-white">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
 
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white">
-                <h5 class="mb-0">Información del pedido</h5>
-            </div>
-
-            <div class="card-body">
-
-                <div class="row">
-                    <div class="col-md-6">
-
-                        <label
-                            for="{{ form.cliente.id_for_label }}"
-                            class="form-label"
-                        >
-                            {{ form.cliente.label }}
-                        </label>
-
-                        {{ form.cliente }}
-
-                        {% if form.cliente.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.cliente.errors }}
-                            </div>
-                        {% endif %}
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="card border-0 shadow-sm mb-4">
-
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">Productos</h5>
                     <small class="text-muted">
@@ -73,86 +77,163 @@
                     <i class="bi bi-plus-lg"></i>
                     Agregar producto
                 </button>
+
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Producto que se está agregando -->
+            <div class="card border mb-4" id="product-selector">
+
+                <div class="card-body">
+
+                    <div class="row g-3 align-items-end">
+
+                        <div class="col-12 col-md-5">
+                            <label
+                                for="product-select"
+                                class="form-label"
+                            >
+                                Artículo
+                            </label>
+
+                            <select
+                                id="product-select"
+                                class="form-select"
+                            >
+                                <option value="">
+                                    Seleccione un artículo
+                                </option>
+
+                                {% for articulo in item_form.articulo.field.queryset %}
+                                    <option
+                                        value="{{ articulo.id }}"
+                                    >
+                                        {{ articulo.sku }} -
+                                        {{ articulo.descripcion }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-2">
+                            <label
+                                for="product-quantity"
+                                class="form-label"
+                            >
+                                Metros
+                            </label>
+
+                            <input
+                                type="number"
+                                id="product-quantity"
+                                class="form-control"
+                                min="0.001"
+                                step="0.001"
+                                inputmode="decimal"
+                                placeholder="0.000"
+                            >
+                        </div>
+
+                        <div class="col-12 col-md-3">
+                            <label
+                                for="product-price"
+                                class="form-label"
+                            >
+                                Precio de venta
+                            </label>
+
+                            <input
+                                type="number"
+                                id="product-price"
+                                class="form-control"
+                                min="0"
+                                step="0.01"
+                                inputmode="decimal"
+                                placeholder="0.00"
+                            >
+                        </div>
+
+                        <div class="col-12 col-md-2">
+                            <button
+                                type="button"
+                                class="btn btn-primary w-100"
+                                id="add-product"
+                            >
+                                <i class="bi bi-plus-lg"></i>
+                                Agregar
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <div
+                        id="product-error"
+                        class="alert alert-danger mt-3 mb-0 d-none"
+                        role="alert"
+                    ></div>
+
+                </div>
+
             </div>
 
-            <div class="card-body">
+
+            <!-- Productos agregados -->
+            <div id="items-container">
 
                 <div
-                    id="items-container"
-                    class="row g-3"
+                    id="empty-items"
+                    class="text-center py-4"
                 >
+                    <i class="bi bi-cart3 fs-1 text-muted"></i>
 
-                    <div class="col-12 order-item">
-                        <div class="card border">
+                    <p class="text-muted mb-0 mt-2">
+                        Aún no hay productos agregados.
+                    </p>
+                </div>
 
+            </div>
+
+
+            <!-- Totales -->
+            <div
+                id="totals-container"
+                class="border-top pt-4 mt-4"
+            >
+
+                <div class="row g-3">
+
+                    <div class="col-12 col-md-6">
+                        <div class="card border-0 bg-light">
                             <div class="card-body">
+                                <small class="text-muted d-block">
+                                    Metros totales
+                                </small>
 
-                                <div class="row g-3 align-items-end">
+                                <span
+                                    id="total-meters"
+                                    class="fs-4 fw-bold"
+                                >
+                                    0,000
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
-                                    <div class="col-md-5">
-                                        <label class="form-label">
-                                            Artículo
-                                        </label>
+                    <div class="col-12 col-md-6">
+                        <div class="card border-0 bg-light">
+                            <div class="card-body">
+                                <small class="text-muted d-block">
+                                    Valor total
+                                </small>
 
-                                        <select
-                                            name="articulo"
-                                            class="form-select"
-                                            required
-                                        >
-                                            <option value="">
-                                                Seleccione un artículo
-                                            </option>
-
-                                            {% for articulo in item_form.articulo.field.queryset %}
-                                                <option value="{{ articulo.id }}">
-                                                    {{ articulo.sku }} -
-                                                    {{ articulo.descripcion }}
-                                                </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-2">
-                                        <label class="form-label">
-                                            Cantidad
-                                        </label>
-
-                                        <input
-                                            type="number"
-                                            name="cantidad"
-                                            class="form-control"
-                                            min="0.01"
-                                            step="0.01"
-                                            required
-                                        >
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <label class="form-label">
-                                            Precio de venta
-                                        </label>
-
-                                        <input
-                                            type="number"
-                                            name="precio_venta"
-                                            class="form-control"
-                                            min="0"
-                                            step="0.01"
-                                            required
-                                        >
-                                    </div>
-
-                                    <div class="col-md-2">
-                                        <button
-                                            type="button"
-                                            class="btn btn-outline-danger w-100 remove-item"
-                                        >
-                                            Eliminar
-                                        </button>
-                                    </div>
-
-                                </div>
-
+                                <span
+                                    id="total-value"
+                                    class="fs-4 fw-bold"
+                                >
+                                    $0,00
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -160,71 +241,760 @@
                 </div>
 
             </div>
-        </div>
-
-        <div class="d-flex justify-content-end gap-2">
-
-            <a
-                href="{% url 'orders:list' %}"
-                class="btn btn-outline-secondary"
-            >
-                Cancelar
-            </a>
-
-            <button
-                type="submit"
-                class="btn btn-primary"
-            >
-                Crear pedido
-            </button>
 
         </div>
+    </div>
 
-    </form>
+
+    <!-- Acciones -->
+    <div class="d-flex flex-column flex-md-row justify-content-end gap-2">
+
+        <a
+            href="{% url 'orders:list' %}"
+            class="btn btn-outline-secondary"
+        >
+            Cancelar
+        </a>
+
+        <button
+            type="submit"
+            class="btn btn-primary"
+            id="submit-order"
+            disabled
+        >
+            <i class="bi bi-check-lg"></i>
+            Crear pedido
+        </button>
+
+    </div>
+
+</form>
+
 
 </div>
-
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
+    const form = document.getElementById("pedido-form");
+
+    const productSelect = document.getElementById("product-select");
+    const quantityInput = document.getElementById("product-quantity");
+    const priceInput = document.getElementById("product-price");
+
+    const addProductButton = document.getElementById("add-product");
+    const addItemButton = document.getElementById("add-item");
+
     const container = document.getElementById("items-container");
-    const addButton = document.getElementById("add-item");
+    const emptyItems = document.getElementById("empty-items");
 
-    function createItemRow() {
-        const firstItem = container.querySelector(".order-item");
+    const totalMetersElement = document.getElementById("total-meters");
+    const totalValueElement = document.getElementById("total-value");
 
-        const newItem = firstItem.cloneNode(true);
+    const submitButton = document.getElementById("submit-order");
+    const errorElement = document.getElementById("product-error");
 
-        newItem.querySelectorAll("input").forEach(function (input) {
-            input.value = "";
-        });
+    let editingRow = null;
 
-        newItem.querySelectorAll("select").forEach(function (select) {
-            select.selectedIndex = 0;
-        });
 
-        container.appendChild(newItem);
-    }
-
-    addButton.addEventListener("click", function () {
-        createItemRow();
+    const metersFormatter = new Intl.NumberFormat("es-CO", {
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3
     });
 
-    container.addEventListener("click", function (event) {
+    const moneyFormatter = new Intl.NumberFormat("es-CO", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
 
-        if (!event.target.classList.contains("remove-item")) {
-            return;
-        }
+
+    function showError(message) {
+        errorElement.textContent = message;
+        errorElement.classList.remove("d-none");
+    }
+
+
+    function clearError() {
+        errorElement.textContent = "";
+        errorElement.classList.add("d-none");
+    }
+
+
+    function updateTotals() {
+
+        let totalMeters = 0;
+        let totalValue = 0;
 
         const rows = container.querySelectorAll(".order-item");
 
-        if (rows.length === 1) {
+        rows.forEach(function (row) {
+
+            const quantity =
+                parseFloat(row.dataset.quantity) || 0;
+
+            const price =
+                parseFloat(row.dataset.price) || 0;
+
+            totalMeters += quantity;
+            totalValue += quantity * price;
+        });
+
+        totalMetersElement.textContent =
+            metersFormatter.format(totalMeters);
+
+        totalValueElement.textContent =
+            "$" + moneyFormatter.format(totalValue);
+
+        submitButton.disabled = rows.length === 0;
+    }
+
+
+    function productAlreadyAdded(productId, currentRow = null) {
+
+        const rows =
+            container.querySelectorAll(".order-item");
+
+        for (const row of rows) {
+
+            if (
+                row !== currentRow &&
+                row.dataset.productId === productId
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    function createProductRow(
+        productId,
+        productName,
+        quantity,
+        price
+    ) {
+
+        const row = document.createElement("div");
+
+        row.className =
+            "order-item card border mb-3";
+
+        row.dataset.productId =
+            productId;
+
+        row.dataset.quantity =
+            quantity;
+
+        row.dataset.price =
+            price;
+
+
+        const body = document.createElement("div");
+
+        body.className =
+            "card-body";
+
+
+        const rowContent = document.createElement("div");
+
+        rowContent.className =
+            "row g-3 align-items-center";
+
+
+        const productColumn =
+            document.createElement("div");
+
+        productColumn.className =
+            "col-12 col-md-4";
+
+
+        const productLabel =
+            document.createElement("small");
+
+        productLabel.className =
+            "text-muted d-block";
+
+        productLabel.textContent =
+            "Artículo";
+
+
+        const productText =
+            document.createElement("div");
+
+        productText.className =
+            "fw-semibold";
+
+        productText.textContent =
+            productName;
+
+
+        productColumn.appendChild(productLabel);
+        productColumn.appendChild(productText);
+
+
+        const quantityColumn =
+            document.createElement("div");
+
+        quantityColumn.className =
+            "col-6 col-md-2";
+
+
+        const quantityLabel =
+            document.createElement("small");
+
+        quantityLabel.className =
+            "text-muted d-block";
+
+        quantityLabel.textContent =
+            "Metros";
+
+
+        const quantityText =
+            document.createElement("div");
+
+        quantityText.className =
+            "fw-semibold quantity-text";
+
+        quantityText.textContent =
+            metersFormatter.format(quantity);
+
+
+        quantityColumn.appendChild(quantityLabel);
+        quantityColumn.appendChild(quantityText);
+
+
+        const priceColumn =
+            document.createElement("div");
+
+        priceColumn.className =
+            "col-6 col-md-2";
+
+
+        const priceLabel =
+            document.createElement("small");
+
+        priceLabel.className =
+            "text-muted d-block";
+
+        priceLabel.textContent =
+            "Precio";
+
+
+        const priceText =
+            document.createElement("div");
+
+        priceText.className =
+            "fw-semibold price-text";
+
+        priceText.textContent =
+            "$" + moneyFormatter.format(price);
+
+
+        priceColumn.appendChild(priceLabel);
+        priceColumn.appendChild(priceText);
+
+
+        const subtotalColumn =
+            document.createElement("div");
+
+        subtotalColumn.className =
+            "col-8 col-md-2";
+
+
+        const subtotalLabel =
+            document.createElement("small");
+
+        subtotalLabel.className =
+            "text-muted d-block";
+
+        subtotalLabel.textContent =
+            "Subtotal";
+
+
+        const subtotalText =
+            document.createElement("div");
+
+        subtotalText.className =
+            "fw-bold subtotal-text";
+
+        subtotalText.textContent =
+            "$" + moneyFormatter.format(
+                quantity * price
+            );
+
+
+        subtotalColumn.appendChild(subtotalLabel);
+        subtotalColumn.appendChild(subtotalText);
+
+
+        const actionColumn =
+            document.createElement("div");
+
+        actionColumn.className =
+            "col-4 col-md-2 d-flex gap-2";
+
+
+        const editButton =
+            document.createElement("button");
+
+        editButton.type =
+            "button";
+
+        editButton.className =
+            "btn btn-outline-primary btn-sm flex-fill edit-item";
+
+        editButton.innerHTML =
+            '<i class="bi bi-pencil"></i> Editar';
+
+
+        const removeButton =
+            document.createElement("button");
+
+        removeButton.type =
+            "button";
+
+        removeButton.className =
+            "btn btn-outline-danger btn-sm flex-fill remove-item";
+
+        removeButton.innerHTML =
+            '<i class="bi bi-trash"></i> Eliminar';
+
+
+        actionColumn.appendChild(editButton);
+        actionColumn.appendChild(removeButton);
+
+
+        /*
+         * Campos que serán enviados al backend.
+         */
+        const articuloInput =
+            document.createElement("input");
+
+        articuloInput.type =
+            "hidden";
+
+        articuloInput.name =
+            "articulo";
+
+        articuloInput.value =
+            productId;
+
+
+        const quantityInputHidden =
+            document.createElement("input");
+
+        quantityInputHidden.type =
+            "hidden";
+
+        quantityInputHidden.name =
+            "cantidad";
+
+        quantityInputHidden.value =
+            Number(quantity).toFixed(3);
+
+
+        const priceInputHidden =
+            document.createElement("input");
+
+        priceInputHidden.type =
+            "hidden";
+
+        priceInputHidden.name =
+            "precio_venta";
+
+        priceInputHidden.value =
+            Number(price).toFixed(2);
+
+
+        rowContent.appendChild(productColumn);
+        rowContent.appendChild(quantityColumn);
+        rowContent.appendChild(priceColumn);
+        rowContent.appendChild(subtotalColumn);
+        rowContent.appendChild(actionColumn);
+
+        body.appendChild(rowContent);
+
+        body.appendChild(articuloInput);
+        body.appendChild(quantityInputHidden);
+        body.appendChild(priceInputHidden);
+
+        row.appendChild(body);
+
+        return row;
+    }
+
+
+    function addProduct() {
+
+        clearError();
+
+        const productId =
+            productSelect.value;
+
+        const quantity =
+            parseFloat(quantityInput.value);
+
+        const price =
+            parseFloat(priceInput.value);
+
+
+        if (!productId) {
+            showError(
+                "Debes seleccionar un artículo."
+            );
             return;
         }
 
-        event.target.closest(".order-item").remove();
-    });
+
+        if (
+            !Number.isFinite(quantity) ||
+            quantity <= 0
+        ) {
+            showError(
+                "Los metros deben ser mayores que cero."
+            );
+            return;
+        }
+
+
+        if (
+            !Number.isFinite(price) ||
+            price < 0
+        ) {
+            showError(
+                "El precio de venta no puede ser negativo."
+            );
+            return;
+        }
+
+
+        if (
+            productAlreadyAdded(
+                productId,
+                editingRow
+            )
+        ) {
+            showError(
+                "Este artículo ya fue agregado al pedido."
+            );
+            return;
+        }
+
+
+        const selectedOption =
+            productSelect.options[
+                productSelect.selectedIndex
+            ];
+
+        const productName =
+            selectedOption.textContent.trim();
+
+
+        /*
+         * MODO EDICIÓN
+         */
+        if (editingRow) {
+
+            editingRow.dataset.productId =
+                productId;
+
+            editingRow.dataset.quantity =
+                quantity;
+
+            editingRow.dataset.price =
+                price;
+
+
+            const articuloInput =
+                editingRow.querySelector(
+                    'input[name="articulo"]'
+                );
+
+            const quantityHidden =
+                editingRow.querySelector(
+                    'input[name="cantidad"]'
+                );
+
+            const priceHidden =
+                editingRow.querySelector(
+                    'input[name="precio_venta"]'
+                );
+
+
+            articuloInput.value =
+                productId;
+
+            quantityHidden.value =
+                Number(quantity).toFixed(3);
+
+            priceHidden.value =
+                Number(price).toFixed(2);
+
+
+            editingRow.querySelector(
+                ".fw-semibold"
+            ).textContent =
+                productName;
+
+
+            editingRow.querySelector(
+                ".quantity-text"
+            ).textContent =
+                metersFormatter.format(quantity);
+
+
+            editingRow.querySelector(
+                ".price-text"
+            ).textContent =
+                "$" + moneyFormatter.format(price);
+
+
+            editingRow.querySelector(
+                ".subtotal-text"
+            ).textContent =
+                "$" + moneyFormatter.format(
+                    quantity * price
+                );
+
+
+            editingRow.classList.remove(
+                "border-primary"
+            );
+
+
+            editingRow = null;
+
+            addProductButton.innerHTML =
+                '<i class="bi bi-plus-lg"></i> Agregar';
+
+
+            productSelect.selectedIndex = 0;
+            quantityInput.value = "";
+            priceInput.value = "";
+
+
+            updateTotals();
+
+            return;
+        }
+
+
+        /*
+         * MODO AGREGAR
+         */
+        const row = createProductRow(
+            productId,
+            productName,
+            quantity,
+            price
+        );
+
+
+        emptyItems.classList.add(
+            "d-none"
+        );
+
+        container.appendChild(row);
+
+
+        productSelect.selectedIndex = 0;
+        quantityInput.value = "";
+        priceInput.value = "";
+
+
+        updateTotals();
+
+        quantityInput.focus();
+    }
+
+
+    /*
+     * Agregar / guardar edición
+     */
+    addProductButton.addEventListener(
+        "click",
+        addProduct
+    );
+
+
+    /*
+     * Botón superior "Agregar producto"
+     */
+    addItemButton.addEventListener(
+        "click",
+        function () {
+
+            cancelEdit();
+
+            productSelect.focus();
+        }
+    );
+
+
+    /*
+     * Editar / eliminar producto
+     */
+    container.addEventListener(
+        "click",
+        function (event) {
+
+            const editButton =
+                event.target.closest(
+                    ".edit-item"
+                );
+
+
+            if (editButton) {
+
+                const row =
+                    editButton.closest(
+                        ".order-item"
+                    );
+
+                if (!row) {
+                    return;
+                }
+
+
+                editingRow = row;
+
+
+                productSelect.value =
+                    row.dataset.productId;
+
+                quantityInput.value =
+                    Number(
+                        row.dataset.quantity
+                    ).toFixed(3);
+
+                priceInput.value =
+                    Number(
+                        row.dataset.price
+                    ).toFixed(2);
+
+
+                container
+                    .querySelectorAll(".order-item")
+                    .forEach(function (item) {
+                        item.classList.remove(
+                            "border-primary"
+                        );
+                    });
+
+
+                row.classList.add(
+                    "border-primary"
+                );
+
+
+                addProductButton.innerHTML =
+                    '<i class="bi bi-check-lg"></i> Guardar cambios';
+
+
+                productSelect.focus();
+
+                return;
+            }
+
+
+            const removeButton =
+                event.target.closest(
+                    ".remove-item"
+                );
+
+
+            if (removeButton) {
+
+                const row =
+                    removeButton.closest(
+                        ".order-item"
+                    );
+
+                if (!row) {
+                    return;
+                }
+
+
+                if (editingRow === row) {
+                    cancelEdit();
+                }
+
+
+                row.remove();
+
+
+                const rows =
+                    container.querySelectorAll(
+                        ".order-item"
+                    );
+
+
+                if (rows.length === 0) {
+
+                    emptyItems.classList.remove(
+                        "d-none"
+                    );
+                }
+
+
+                updateTotals();
+            }
+
+        }
+    );
+
+
+    function cancelEdit() {
+
+        if (editingRow) {
+
+            editingRow.classList.remove(
+                "border-primary"
+            );
+
+            editingRow = null;
+        }
+
+
+        productSelect.selectedIndex = 0;
+        quantityInput.value = "";
+        priceInput.value = "";
+
+
+        addProductButton.innerHTML =
+            '<i class="bi bi-plus-lg"></i> Agregar';
+
+        clearError();
+    }
+
+
+    /*
+     * Evitar enviar un pedido sin productos.
+     */
+    form.addEventListener(
+        "submit",
+        function (event) {
+
+            const rows =
+                container.querySelectorAll(
+                    ".order-item"
+                );
+
+            if (rows.length === 0) {
+
+                event.preventDefault();
+
+                showError(
+                    "Debes agregar al menos un producto al pedido."
+                );
+
+                return;
+            }
+        }
+    );
+
+
+    updateTotals();
 
 });
 </script>
