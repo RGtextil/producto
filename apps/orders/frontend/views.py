@@ -1,33 +1,67 @@
+from decimal import Decimal
+
 from django.contrib import messages
-from django.http import Http404
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_GET, require_POST
 
-from apps.orders.backend.exceptions import (
-    ArticuloInactivoException,
+from apps.customers.backend.services import CustomerService
+from apps.inventory.backend.exceptions import (
     ArticuloNoEncontradoException,
-    CantidadInvalidaException,
-    CambioEstadoInvalidoException,
-    ClienteInactivoException,
-    ClienteNoEncontradoException,
-    PedidoItemInvalidoException,
-    PedidoNoEncontradoException,
-    PedidoSinItemsException,
-    PedidoYaEntregadoException,
-    PrecioVentaInvalidoException,
-    ProductoDuplicadoException,
-    StockInsuficienteException,
 )
-
+from apps.inventory.backend.services import InventoryService
 from apps.orders.backend.services import OrderService
 
 from .forms import (
-    PedidoForm,
-    PedidoItemForm,
+    PedidoArticuloForm,
+    PedidoClienteForm,
 )
 
+def _get_productos_sesion(request):
 
-def order_list(request):
-    """Muestra la lista de pedidos."""
+    productos_sesion = request.session.get(
+        "pedido_productos",
+        [],
+    )
+
+    productos = []
+    total = Decimal("0")
+
+    for producto in productos_sesion:
+
+        cantidad = Decimal(
+            str(producto["cantidad"])
+        )
+
+        precio_venta = Decimal(
+            str(producto["precio_venta"])
+        )
+
+        subtotal = cantidad * precio_venta
+
+        productos.append(
+            {
+                "articulo_id": producto["articulo_id"],
+                "sku": producto["sku"],
+                "descripcion": producto["descripcion"],
+                "color": producto["color"],
+                "cantidad": cantidad,
+                "precio_venta": precio_venta,
+                "subtotal": subtotal,
+            }
+        )
+
+        total += subtotal
+
+    return productos, total
+
+@require_GET
+def pedido_list(request):
+    """
+    Lista los pedidos existentes.
+
+    Solo lectura.
+    La consulta se realiza mediante OrderService.
+    """
 
     pedidos = OrderService.list_pedidos()
 
@@ -39,213 +73,416 @@ def order_list(request):
         },
     )
 
-
+@require_GET
 def pedido_create(request):
-    """Crea un pedido con uno o varios productos."""
 
-    if request.method == "POST":
-        form = PedidoForm(request.POST)
+    productos, total = _get_productos_sesion(request)
 
-        if form.is_valid():
-            articulo_ids = request.POST.getlist("articulo")
-            cantidades = request.POST.getlist("cantidad")
-            precios_venta = request.POST.getlist("precio_venta")
+    form = PedidoArticuloForm()
 
-            if not articulo_ids:
-                form.add_error(
-                    None,
-                    "El pedido debe contener al menos un producto.",
-                )
+    cliente_form = PedidoClienteForm()
 
-            elif not (
-                len(articulo_ids)
-                == len(cantidades)
-                == len(precios_venta)
-            ):
-                form.add_error(
-                    None,
-                    "Los datos de los productos del pedido no son válidos.",
-                )
+    clientes = CustomerService.list_clientes_activos()
 
-            else:
-                items = []
-
-                for articulo_id, cantidad, precio_venta in zip(
-                    articulo_ids,
-                    cantidades,
-                    precios_venta,
-                ):
-                    items.append(
-                        {
-                            "articulo_id": articulo_id,
-                            "cantidad": cantidad,
-                            "precio_venta": precio_venta,
-                        }
-                    )
-
-                try:
-                    pedido = OrderService.create_pedido(
-                        cliente_id=form.cleaned_data["cliente"].id,
-                        items=items,
-                    )
-
-                except (
-                    ClienteNoEncontradoException,
-                    ClienteInactivoException,
-                    ArticuloNoEncontradoException,
-                    ArticuloInactivoException,
-                    CantidadInvalidaException,
-                    PrecioVentaInvalidoException,
-                    ProductoDuplicadoException,
-                    PedidoSinItemsException,
-                    PedidoItemInvalidoException,
-                    StockInsuficienteException,
-                ) as exc:
-                    form.add_error(None, str(exc))
-
-                else:
-                    messages.success(
-                        request,
-                        f"Pedido #{pedido.id} creado correctamente.",
-                    )
-
-                    return redirect(
-                        "orders:detail",
-                        pedido_id=pedido.id,
-                    )
-    else:
-        form = PedidoForm()
-
-    item_form = PedidoItemForm()
+    descripciones = (
+        InventoryService
+        .list_descripciones_disponibles()
+    )
 
     return render(
         request,
         "orders/form.html",
         {
             "form": form,
-            "item_form": item_form,
+            "cliente_form": cliente_form,
+            "clientes": clientes,
+            "descripciones": descripciones,
+            "productos": productos,
+            "total": total,
             "title": "Nuevo pedido",
-            "submit_text": "Crear pedido",
         },
     )
 
+@require_POST
+def pedido_agregar_producto(request):
 
-def pedido_detail(request, pedido_id):
-    """Muestra el detalle de un pedido."""
+    form = PedidoArticuloForm(request.POST)
+
+    if not form.is_valid():
+
+        productos, total = _get_productos_sesion(request)
+
+        clientes = CustomerService.list_clientes_activos()
+
+        descripciones = (
+            InventoryService
+            .list_descripciones_disponibles()
+        )
+
+        cliente_form = PedidoClienteForm()
+
+        return render(
+            request,
+            "orders/form.html",
+            {
+                "form": form,
+                "cliente_form": cliente_form,
+                "clientes": clientes,
+                "descripciones": descripciones,
+                "productos": productos,
+                "total": total,
+                "title": "Nuevo pedido",
+            },
+            status=400,
+        )
+
+    descripcion = form.cleaned_data["descripcion"]
+    color = form.cleaned_data["color"]
 
     try:
-        pedido = OrderService.get_pedido(pedido_id)
 
-    except PedidoNoEncontradoException as exc:
-        raise Http404(str(exc))
+        articulo = (
+            InventoryService
+            .get_articulo_by_descripcion_and_color(
+                descripcion,
+                color,
+            )
+        )
 
-    items = OrderService.get_items(pedido_id)
+    except ArticuloNoEncontradoException as exc:
 
-    total = OrderService.get_total(pedido_id)
+        form.add_error(
+            "color",
+            str(exc),
+        )
+
+        productos, total = _get_productos_sesion(request)
+
+        clientes = CustomerService.list_clientes_activos()
+
+        descripciones = (
+            InventoryService
+            .list_descripciones_disponibles()
+        )
+
+        cliente_form = PedidoClienteForm()
+
+        return render(
+            request,
+            "orders/form.html",
+            {
+                "form": form,
+                "cliente_form": cliente_form,
+                "clientes": clientes,
+                "descripciones": descripciones,
+                "productos": productos,
+                "total": total,
+                "title": "Nuevo pedido",
+            },
+            status=400,
+        )
+
+    producto = {
+        "articulo_id": articulo.id,
+        "sku": articulo.sku,
+        "descripcion": articulo.descripcion,
+        "color": articulo.color,
+        "cantidad": str(
+            form.cleaned_data["cantidad"]
+        ),
+        "precio_venta": str(
+            form.cleaned_data["precio_venta"]
+        ),
+    }
+
+    productos_sesion = request.session.get(
+        "pedido_productos",
+        [],
+    )
+
+    productos_sesion.append(producto)
+
+    request.session["pedido_productos"] = productos_sesion
+    request.session.modified = True
+
+    messages.success(
+        request,
+        "Producto agregado al pedido.",
+    )
+
+    return redirect(
+        "orders:create"
+    )
+
+@require_POST
+def pedido_eliminar_producto(request, index):
+
+    productos_sesion = request.session.get(
+        "pedido_productos",
+        [],
+    )
+
+    try:
+        product_index = int(index)
+
+    except (TypeError, ValueError):
+
+        messages.error(
+            request,
+            "El producto seleccionado no es válido.",
+        )
+
+        return redirect(
+            "orders:create"
+        )
+
+    if (
+        product_index < 0
+        or product_index >= len(productos_sesion)
+    ):
+
+        messages.error(
+            request,
+            "El producto seleccionado no existe.",
+        )
+
+        return redirect(
+            "orders:create"
+        )
+
+    productos_sesion.pop(product_index)
+
+    request.session["pedido_productos"] = productos_sesion
+    request.session.modified = True
+
+    messages.success(
+        request,
+        "Producto eliminado del pedido.",
+    )
+
+    return redirect(
+        "orders:create"
+    )
+
+@require_POST
+def pedido_crear(request):
+    """
+    Crea definitivamente el pedido.
+
+    Los productos ya fueron agregados previamente
+    y se encuentran temporalmente en la sesión.
+
+    Esta vista NO utiliza PedidoArticuloForm.
+    """
+
+    productos, total = _get_productos_sesion(request)
+
+    # -----------------------------------------------------
+    # VALIDAR QUE EXISTAN PRODUCTOS
+    # -----------------------------------------------------
+
+    if not productos:
+
+        messages.error(
+            request,
+            "El pedido debe contener al menos un producto.",
+        )
+
+        return redirect(
+            "orders:create"
+        )
+
+    # -----------------------------------------------------
+    # VALIDAR CLIENTE
+    # -----------------------------------------------------
+
+    cliente_form = PedidoClienteForm(
+        request.POST
+    )
+
+    if not cliente_form.is_valid():
+
+        clientes = (
+            CustomerService
+            .list_clientes_activos()
+        )
+
+        descripciones = (
+            InventoryService
+            .list_descripciones_disponibles()
+        )
+
+        form = PedidoArticuloForm()
+
+        return render(
+            request,
+            "orders/form.html",
+            {
+                "form": form,
+                "cliente_form": cliente_form,
+                "clientes": clientes,
+                "descripciones": descripciones,
+                "productos": productos,
+                "total": total,
+                "title": "Nuevo pedido",
+            },
+            status=400,
+        )
+
+    # -----------------------------------------------------
+    # OBTENER CLIENTE
+    # -----------------------------------------------------
+
+    cliente_id = (
+        cliente_form.cleaned_data[
+            "cliente_id"
+        ]
+    )
+
+    # -----------------------------------------------------
+    # RECONSTRUIR ITEMS
+    # -----------------------------------------------------
+    #
+    # Los datos vienen de la sesión, pero el
+    # OrderService vuelve a validar todo en backend.
+    #
+
+    items = [
+        {
+            "articulo_id": producto["articulo_id"],
+            "cantidad": producto["cantidad"],
+            "precio_venta": producto["precio_venta"],
+        }
+        for producto in productos
+    ]
+
+    # -----------------------------------------------------
+    # CREAR PEDIDO
+    # -----------------------------------------------------
+
+    pedido = OrderService.create_pedido(
+        cliente_id=cliente_id,
+        items=items,
+    )
+
+    # -----------------------------------------------------
+    # LIMPIAR BORRADOR
+    # -----------------------------------------------------
+
+    request.session.pop(
+        "pedido_productos",
+        None,
+    )
+
+    request.session.modified = True
+
+    # -----------------------------------------------------
+    # MENSAJE
+    # -----------------------------------------------------
+
+    messages.success(
+        request,
+        f"Pedido #{pedido.id} creado correctamente.",
+    )
+
+    # -----------------------------------------------------
+    # REDIRECCIÓN
+    # -----------------------------------------------------
+
+    return redirect(
+        "orders:list"
+    )
+
+
+@require_GET
+def pedido_colores(request):
+    """
+    Devuelve los colores disponibles para una descripción.
+
+    Solo lectura.
+    Diseñada para ser consumida por HTMX.
+    """
+
+    descripcion = request.GET.get(
+        "descripcion",
+        "",
+    ).strip()
+
+    colores = (
+        InventoryService
+        .list_colores_by_descripcion(
+            descripcion
+        )
+    )
 
     return render(
         request,
-        "orders/detail.html",
+        "orders/partials/color_options.html",
         {
-            "pedido": pedido,
-            "items": items,
-            "total": total,
+            "descripcion": descripcion,
+            "colores": colores,
         },
     )
 
-
-def pedido_cancel(request, pedido_id):
+@require_GET
+def pedido_articulo(request):
     """
-    Intenta cancelar un pedido.
+    Identifica un artículo mediante descripción y color.
 
-    Actualmente un pedido entregado no puede cancelarse
-    automáticamente porque ya produjo movimientos de inventario.
+    Solo lectura.
+    Diseñada para ser consumida por HTMX.
     """
 
-    if request.method != "POST":
-        return redirect(
-            "orders:detail",
-            pedido_id=pedido_id,
+    descripcion = request.GET.get(
+        "descripcion",
+        "",
+    ).strip()
+
+    color = request.GET.get(
+        "color",
+        "",
+    ).strip()
+
+    # -----------------------------------------------------
+    # DATOS INCOMPLETOS
+    # -----------------------------------------------------
+
+    if not descripcion or not color:
+
+        return render(
+            request,
+            "orders/partials/articulo_selected.html",
+            {
+                "articulo": None,
+            },
         )
+
+    # -----------------------------------------------------
+    # BUSCAR ARTÍCULO
+    # -----------------------------------------------------
 
     try:
-        OrderService.cancel_pedido(pedido_id)
 
-    except PedidoNoEncontradoException as exc:
-        raise Http404(str(exc))
-
-    except CambioEstadoInvalidoException as exc:
-        messages.error(
-            request,
-            str(exc),
+        articulo = (
+            InventoryService
+            .get_articulo_by_descripcion_and_color(
+                descripcion,
+                color,
+            )
         )
 
-        return redirect(
-            "orders:detail",
-            pedido_id=pedido_id,
-        )
+    except ArticuloNoEncontradoException:
 
-    else:
-        messages.success(
-            request,
-            "Pedido cancelado correctamente.",
-        )
+        articulo = None
 
-        return redirect(
-            "orders:detail",
-            pedido_id=pedido_id,
-        )
+    # -----------------------------------------------------
+    # RESPUESTA HTMX
+    # -----------------------------------------------------
 
-
-def pedido_deliver(request, pedido_id):
-    """
-    Intenta entregar un pedido.
-
-    La creación actual ya genera pedidos ENTREGADOS,
-    por lo que esta transición queda restringida.
-    """
-
-    if request.method != "POST":
-        return redirect(
-            "orders:detail",
-            pedido_id=pedido_id,
-        )
-
-    try:
-        OrderService.deliver_pedido(pedido_id)
-
-    except PedidoNoEncontradoException as exc:
-        raise Http404(str(exc))
-
-    except PedidoYaEntregadoException as exc:
-        messages.info(
-            request,
-            str(exc),
-        )
-
-        return redirect(
-            "orders:detail",
-            pedido_id=pedido_id,
-        )
-
-    except CambioEstadoInvalidoException as exc:
-        messages.error(
-            request,
-            str(exc),
-        )
-
-        return redirect(
-            "orders:detail",
-            pedido_id=pedido_id,
-        )
-
-    else:
-        messages.success(
-            request,
-            "Pedido entregado correctamente.",
-        )
-
-        return redirect(
-            "orders:detail",
-            pedido_id=pedido_id,
-        )
+    return render(
+        request,
+        "orders/partials/articulo_selected.html",
+        {
+            "articulo": articulo,
+        },
+    )

@@ -132,6 +132,56 @@ class InventoryService:
             estado=ArticuloEstado.ACTIVO,
         )
 
+    
+    @staticmethod
+    def list_descripciones_disponibles():
+        return ArticuloRepository.list_active_descriptions()
+
+    @staticmethod
+    def list_colores_by_descripcion(descripcion):
+        descripcion = str(descripcion or "").strip()
+
+        if not descripcion:
+            return []
+
+        return ArticuloRepository.list_active_colors_by_description(
+            descripcion
+        )
+
+    @staticmethod
+    def get_articulo_by_descripcion_and_color(
+        descripcion,
+        color,
+    ):
+        descripcion = str(descripcion or "").strip()
+        color = str(color or "").strip()
+
+        if not descripcion:
+            raise ArticuloNoEncontradoException(
+                "La descripción del artículo es obligatoria."
+            )
+
+        if not color:
+            raise ArticuloNoEncontradoException(
+                "El color del artículo es obligatorio."
+            )
+
+        articulo = (
+            ArticuloRepository
+            .get_active_by_description_and_color(
+                descripcion,
+                color,
+            )
+        )
+
+        if articulo is None:
+            raise ArticuloNoEncontradoException(
+                "No existe un artículo activo con "
+                "la descripción y color seleccionados."
+            )
+
+        return articulo
+
     @staticmethod
     def get_articulo(articulo_id):
         articulo = ArticuloRepository.get_by_id(

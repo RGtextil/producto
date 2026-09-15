@@ -388,3 +388,23 @@ class BalanceService:
             "total_deudas": total_deudas,
             "balance_final": balance_final,
         }
+
+
+    @staticmethod
+    @transaction.atomic
+    def delete_otro_dinero(otro_dinero_id):
+        otro_dinero = OtroDineroRepository.get_required(
+            otro_dinero_id
+        )
+
+        OtroDineroRepository.delete(otro_dinero)
+
+
+    @staticmethod
+    @transaction.atomic
+    def delete_deuda(deuda_id):
+        deuda = DeudaRepository.get_required(
+            deuda_id
+        )
+
+        DeudaRepository.delete(deuda)     

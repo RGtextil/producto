@@ -1,0 +1,43 @@
+{% if articulo %}
+
+    <div class="alert alert-success mb-0">
+
+        <div class="fw-semibold mb-1">
+            Artículo encontrado
+        </div>
+
+        <div>
+            <strong>SKU:</strong>
+            {{ articulo.sku }}
+        </div>
+
+        <div>
+            <strong>Descripción:</strong>
+            {{ articulo.descripcion }}
+        </div>
+
+        <div>
+            <strong>Color:</strong>
+            {{ articulo.color }}
+        </div>
+
+        <input
+            type="hidden"
+            name="articulo_id"
+            value="{{ articulo.id }}"
+        >
+
+    </div>
+
+{% else %}
+
+    <div class="alert alert-light border mb-0">
+
+        <span class="text-muted">
+            Selecciona una descripción y un color para identificar
+            el artículo.
+        </span>
+
+    </div>
+
+{% endif %}

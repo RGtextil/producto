@@ -26,21 +26,6 @@
                     </small>
                 </div>
 
-        <div class="d-flex gap-2">
-            <a href="{% url 'balance:otro_dinero_create' %}"
-               class="btn btn-outline-primary">
-                <i class="bi bi-wallet2"></i>
-                Otro dinero
-            </a>
-
-            <a href="{% url 'balance:deuda_create' %}"
-               class="btn btn-outline-danger">
-                <i class="bi bi-credit-card"></i>
-                Nueva deuda
-            </a>
-        </div>
-    </div>
-
     <!-- Resumen -->
     <div class="row g-3 mb-4">
 
@@ -129,31 +114,7 @@
 
     </div>
 
-    <!-- Balance final -->
-    <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body p-4">
-
-            <div class="row align-items-center">
-
-              
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-
-                    <a href="{% url 'balance:otro_dinero_list' %}"
-                       class="btn btn-outline-primary me-1">
-                        Otros dineros
-                    </a>
-
-                    <a href="{% url 'balance:deuda_list' %}"
-                       class="btn btn-outline-danger">
-                        Deudas
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-    </div>
+   
 
     <!-- Otros dineros -->
     <div class="card shadow-sm border-0 mb-4">
@@ -183,6 +144,7 @@
                                 <th>Concepto</th>
                                 <th>Fecha</th>
                                 <th class="text-end">Monto</th>
+                                <th class="text-end">Acciones</th>
                             </tr>
                         </thead>
 
@@ -205,6 +167,35 @@
                                     <td class="text-end">
                                         ${{ item.monto|moneda }}
                                     </td>
+                                      <td class="text-end">
+                <div class="d-flex justify-content-end gap-1">
+
+                    <a href="{% url 'balance:otro_dinero_update' item.id %}"
+                       class="btn btn-sm btn-outline-primary"
+                       title="Editar">
+                        <i class="bi bi-pencil"></i>
+                        <span>
+                            Editar
+                        </span>
+                    </a>
+
+                    <form method="post"
+                          action="{% url 'balance:otro_dinero_delete' item.id %}"
+                          class="d-inline">
+                        {% csrf_token %}
+
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger"
+                                title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                            <span>
+                                Eliminar
+                            </span>
+                        </button>
+                    </form>
+
+                </div>
+            </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -251,6 +242,7 @@
                                 <th>Concepto</th>
                                 <th>Vencimiento</th>
                                 <th class="text-end">Monto</th>
+                                <th class="text-end">Acciones</th>
                             </tr>
                         </thead>
 
@@ -279,6 +271,35 @@
                                     <td class="text-end text-danger">
                                         ${{ deuda.monto|moneda }}
                                     </td>
+                                     <td class="text-end">
+                <div class="d-flex justify-content-end gap-1">
+
+                    <a href="{% url 'balance:deuda_update' deuda.id %}"
+                       class="btn btn-sm btn-outline-primary"
+                       title="Editar">
+                        <i class="bi bi-pencil"></i>
+                        <span>
+                            Editar
+                        </span>
+                    </a>
+
+                    <form method="post"
+                          action="{% url 'balance:deuda_delete' deuda.id %}"
+                          class="d-inline">
+                        {% csrf_token %}
+
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger"
+                                title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                            <span>
+                                Eliminar
+                            </span>
+                        </button>
+                    </form>
+
+                </div>
+            </td>
                                 </tr>
                             {% endfor %}
                         </tbody>

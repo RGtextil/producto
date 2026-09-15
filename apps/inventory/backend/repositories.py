@@ -64,6 +64,46 @@ class ArticuloRepository:
     def delete(articulo):
         articulo.delete()
 
+    @staticmethod
+    def list_active_descriptions():
+        return (
+            Articulo.objects
+            .filter(estado="ACTIVO")
+            .exclude(descripcion="")
+            .values_list("descripcion", flat=True)
+            .distinct()
+            .order_by("descripcion")
+        )
+
+    @staticmethod
+    def list_active_colors_by_description(descripcion):
+        return (
+            Articulo.objects
+            .filter(
+                estado="ACTIVO",
+                descripcion=descripcion,
+            )
+            .exclude(color="")
+            .values_list("color", flat=True)
+            .distinct()
+            .order_by("color")
+        )
+
+    @staticmethod
+    def get_active_by_description_and_color(
+        descripcion,
+        color,
+    ):
+        return (
+            Articulo.objects
+            .filter(
+                estado="ACTIVO",
+                descripcion=descripcion,
+                color=color,
+            )
+            .first()
+        )
+
 
 class ItemInventarioRepository:
     """Acceso a datos de ItemInventario."""

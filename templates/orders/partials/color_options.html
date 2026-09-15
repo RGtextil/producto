@@ -1,0 +1,39 @@
+<label
+for="product-color"
+class="form-label"
+
+>
+
+Color
+
+</label>
+
+<select
+id="product-color"
+name="color"
+class="form-select"
+{% if not colores %}disabled{% endif %}
+{% if descripcion %}
+hx-get="{% url 'orders:articulo' %}"
+hx-trigger="change"
+hx-target="#article-container"
+hx-swap="innerHTML"
+{% endif %}
+
+>
+
+<option value="">
+    {% if descripcion %}
+        Seleccione un color
+    {% else %}
+        Seleccione primero una descripción
+    {% endif %}
+</option>
+
+{% for color in colores %}
+    <option value="{{ color }}">
+        {{ color }}
+    </option>
+{% endfor %}
+
+</select>
